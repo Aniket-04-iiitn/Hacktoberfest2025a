@@ -1,0 +1,50 @@
+typedef struct {
+    struct TreeNode* node;
+    int level;
+} QueueNode;
+
+int* rightSideView(struct TreeNode* root, int* returnSize) {
+    if (!root) {
+        *returnSize = 0;
+        return NULL;
+    }
+
+    int capacity = 100;
+    int* result = (int*)malloc(capacity * sizeof(int));
+    QueueNode* queue = (QueueNode*)malloc(capacity * sizeof(QueueNode));
+
+    int front = 0, rear = 0;
+    int currLevel = -1;
+
+    queue[rear++] = (QueueNode){root, 0};
+
+    while (front < rear) {
+        QueueNode qnode = queue[front++];
+        struct TreeNode* node = qnode.node;
+        int level = qnode.level;
+
+        if (level > currLevel) {
+            result[level] = node->val;
+            currLevel = level;
+        } else {
+            result[level] = node->val; // Keep updating to get rightmost node
+        }
+
+        if (node->left)
+            queue[rear++] = (QueueNode){node->left, level + 1};
+        if (node->right)
+            queue[rear++] = (QueueNode){node->right, level + 1};
+
+        // Resize if needed
+        if (rear >= capacity) {
+            capacity *= 2;
+            queue = (QueueNode*)realloc(queue, capacity * sizeof(QueueNode));
+            result = (int*)realloc(result, capacity * sizeof(int));
+        }
+    }
+
+    *returnSize = currLevel + 1;
+
+    free(queue);
+    return result;
+}
